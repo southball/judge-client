@@ -1,0 +1,16 @@
+.error-notification {
+  display: none;
+
+  &.error-transition-enter,
+  &.error-transition-enter-done,
+  &.error-transition-exit,
+  &.error-transition-exit-done {
+    display: block;
+  }
+
+  &.error-transition-enter { opacity: 0; }
+  &.error-transition-enter-active { opacity: 1; transition: opacity 1000ms; }
+  &.error-transition-exit { opacity: 1; }
+  &.error-transition-exit-active { opacity: 0; transition: opacity 1000ms; }
+  &.error-transition-exit-done { display: none; }
+}
