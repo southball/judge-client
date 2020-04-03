@@ -99,7 +99,7 @@ const ProblemRender = ({ problem, contest, submit }: { problem: Problem, contest
     )
 };
 
-const Problem = () => {
+const ProblemPage = () => {
     const { contestSlug, contestProblemSlug, problemSlug } = useParams();
     const jwtContext = React.useContext(JWTContext);
     const [contest, setContest] = React.useState();
@@ -135,4 +135,4 @@ const Problem = () => {
     );
 };
 
-export default Problem;
+export default ProblemPage;

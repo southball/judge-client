@@ -3,6 +3,7 @@ const dotenv = require('dotenv');
 const htmlWebpackPlugin = require('html-webpack-plugin');
 const path = require('path');
 const webpack = require('webpack');
+const bundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
 dotenv.config();
 
@@ -54,5 +55,18 @@ module.exports = {
             {from: 'static/**', to: '.'},
         ]),
         new webpack.EnvironmentPlugin(['JUDGE_SERVER']),
+        new bundleAnalyzerPlugin({
+            openAnalyzer: false,
+            analyzerPort: 8081,
+        }),
+        new webpack.HotModuleReplacementPlugin({
+            multiStep: true,
+        }),
     ],
+    devServer: {
+        contentBase: path.resolve(__dirname, 'dist'),
+        compress: true,
+        port: 8080,
+        hot: true,
+    },
 };

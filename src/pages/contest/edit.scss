@@ -1,0 +1,5 @@
+@import "~bulma/sass/utilities/initial-variables.sass";
+
+.react-select-danger > div[class$=control] {
+  border-color: $red;
+}

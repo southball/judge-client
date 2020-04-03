@@ -1,6 +1,15 @@
 @charset "utf-8";
 
+@import "~bulma/sass/utilities/initial-variables.sass";
+
 $family-sans-serif: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
 $family-monospace: Consolas, monospace;
 
-@import "../node_modules/bulma/bulma.sass";
+$primary: $blue;
+$link: $turquoise;
+
+@import "~bulma/bulma.sass";
+
+.control-group {
+  margin-bottom: 1em;
+}

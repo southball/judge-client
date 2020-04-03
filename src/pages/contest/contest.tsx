@@ -1,10 +1,10 @@
+import * as moment from 'moment';
 import * as React from 'react';
 import { useHistory, useParams } from 'react-router';
+import { NavLink } from 'react-router-dom';
 import NowLoading from '../../components/NowLoading/NowLoading';
 import GlobalConfigContext from '../../contexts/GlobalConfigContext';
 import JWTContext from '../../contexts/JWTContext';
-import axios from 'axios';
-import * as moment from 'moment';
 import API, { Problem } from '../../models/API';
 
 const ContestRender = ({ contest }: any) => {
@@ -15,7 +15,11 @@ const ContestRender = ({ contest }: any) => {
         <div>
             <h1 className="title is-2">{contest.title}</h1>
 
-            {/*<pre>{JSON.stringify(contest, null, 4)}</pre>*/}
+            <div className="control-group">
+                <NavLink to={`/contest/${contest.slug}/edit`}>
+                    <button className="button is-primary">Edit Contest</button>
+                </NavLink>
+            </div>
 
             <h2 className="title is-3">Information</h2>
             <table className="table is-fullwidth is-hoverable is-narrow ">

@@ -10,6 +10,7 @@ import LogoutPage from '../../pages/logout/logout';
 import ProblemPage from '../../pages/problem/problem';
 import ProblemsPage from '../../pages/problems/problems';
 import SubmissionPage from '../../pages/submission/submission';
+import ContestEditPage from '../../pages/contest/edit';
 import NavBar, { NavLinkType } from '../NavBar/NavBar';
 import './App.scss';
 
@@ -46,6 +47,7 @@ const App = () => {
                 <Route path="/" exact component={HomePage} />
                 <Route path="/contests" exact component={ContestsPage} />
                 <Route path="/contest/:contestSlug" exact component={ContestPage} />
+                <Route path="/contest/:contestSlug/edit" exact component={ContestEditPage} />
                 <Route path="/contest/:contestSlug/problem/:contestProblemSlug" exact component={ProblemPage} />
                 <Route path="/problems" exact component={ProblemsPage} />
                 <Route path="/problem/:problemSlug" exact component={ProblemPage} />

@@ -7,6 +7,10 @@ import Router from './routers/Router';
 
 import './style.scss';
 
+import '@fortawesome/fontawesome-free/scss/fontawesome.scss';
+import '@fortawesome/fontawesome-free/scss/solid.scss';
+import '@fortawesome/fontawesome-free/scss/brands.scss';
+
 ReactDOM.render(
     <GlobalConfigContextController>
         <JWTContextController>
