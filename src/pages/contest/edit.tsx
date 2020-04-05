@@ -2,27 +2,11 @@ import * as moment from 'moment';
 import * as React from 'react';
 import { useHistory, useParams } from 'react-router';
 import Select from 'react-select';
+import { Field, FieldRow } from '../../components/FormHelper/FormHelper';
 import NowLoading from '../../components/NowLoading/NowLoading';
 import JWTContext from '../../contexts/JWTContext';
 import API, { Contest, Problem } from '../../models/API';
 import './edit.scss';
-
-interface FieldProps {
-    className?: string;
-    description: string;
-    children: any;
-}
-
-const FieldRow = ({ children }: { children: any }) => (
-    <div className="columns" style={{ marginBottom: '0' }}>{children}</div>
-);
-
-const Field = ({ className, children, description }: FieldProps) => (
-    <div className={`${className ?? ''} field`}>
-        <label className="label">{description}</label>
-        <div className="control is-expanded">{children}</div>
-    </div>
-);
 
 const ContestEditRender = ({ initialContest, initialProblems }: { initialContest: Contest, initialProblems: Problem[] }) => {
     const [contest, setContest] = React.useState(initialContest);

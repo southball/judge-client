@@ -54,6 +54,13 @@ export default class API {
         return response.data.data;
     }
 
+    public async updateProblem(problemSlug: string, newProblem: Problem): Promise<Problem> {
+        const response = await axios.put(API.resolveURL(`/problem/${problemSlug}`), {...newProblem}, await this.jwtContext.withAuthorization({}));
+        if (!response.data.success)
+            throw response.data;
+        return response.data.data;
+    }
+
     public async getContestProblem(contestSlug: string, contestProblemSlug: string): Promise<Problem> {
         const response = await axios.get(API.resolveURL(`/contest/${contestSlug}/problem/${contestProblemSlug}`), await this.jwtContext.withAuthorization({}));
         if (!response.data.success)

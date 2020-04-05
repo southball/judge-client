@@ -80,7 +80,7 @@ const Nav = ({left, right}: NavProps) => {
     };
 
     return (
-        <nav className="navbar is-dark is-fixed-top" style={{ boxShadow: '0 2px 0 0 #f5f5f5' }}>
+        <nav className="navbar is-dark is-fixed-top" style={{ boxShadow: '0 2px 0 0 #f5f5f5', zIndex: 10000 }}>
             <NavbarBrand toggle={toggle} />
             <NavbarBody toggled={toggled}>
                 <NavbarItemLeft>

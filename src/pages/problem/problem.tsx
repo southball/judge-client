@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useHistory, useParams } from 'react-router';
 import { NavLink } from 'react-router-dom';
+import { ReactAceHelper } from '../../components/FormHelper/FormHelper';
 import NowLoading from '../../components/NowLoading/NowLoading';
 import JWTContext from '../../contexts/JWTContext';
 import API, { Contest, Problem, SubmissionID } from '../../models/API';
@@ -9,8 +10,6 @@ import AceEditor from 'react-ace';
 import Select from 'react-select';
 
 import './problem.scss';
-import 'ace-builds/src-noconflict/mode-c_cpp';
-import 'ace-builds/src-noconflict/theme-github';
 
 type SelectOption = { value: string, label: string };
 type SubmitFunction = (language: string, sourceCode: string) => any;
@@ -25,6 +24,7 @@ const ProblemRender = ({ problem, contest, submit }: { problem: Problem, contest
     const languages: SelectOption[] = [
         { value: 'python3', label: 'Python 3' },
         { value: 'cpp17', label: 'C++17' },
+        { value: 'nodejs', label: 'NodeJS' },
     ];
 
     React.useEffect(() => {
@@ -56,6 +56,11 @@ const ProblemRender = ({ problem, contest, submit }: { problem: Problem, contest
                 Time limit: {problem.time_limit} s / Memory
                 limit: {problem.memory_limit} KB
             </h2>
+            <div className="control-group">
+                <NavLink to={`/problem/${problem.slug}/edit`}>
+                    <button className="button is-primary">Edit</button>
+                </NavLink>
+            </div>
             <hr />
             <div className="content" dangerouslySetInnerHTML={{ __html: renderedStatement }} />
 
@@ -75,16 +80,12 @@ const ProblemRender = ({ problem, contest, submit }: { problem: Problem, contest
                             }}
                             style={{ zIndex: 1000 }}
                         />
-                        <AceEditor
+                        <ReactAceHelper
                             mode="c_cpp"
-                            theme="github"
                             name="editor"
                             value={sourceCode}
-                            width="100%"
-                            height="300px"
-                            wrapEnabled={true}
-                            onChange={setSourceCode}
-                            setOptions={{ readOnly: frozen }}
+                            disabled={frozen}
+                            onChange={(event) => setSourceCode(event.target.value)}
                         />
                     </>
             }

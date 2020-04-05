@@ -3,14 +3,15 @@ import { useContext } from 'react';
 import { Route } from 'react-router';
 import JWTContext from '../../contexts/JWTContext';
 import ContestPage from '../../pages/contest/contest';
+import ContestEditPage from '../../pages/contest/edit';
 import ContestsPage from '../../pages/contests/contests';
 import HomePage from '../../pages/home/home';
 import LoginPage from '../../pages/login/login';
 import LogoutPage from '../../pages/logout/logout';
+import ProblemEditPage from '../../pages/problem/edit';
 import ProblemPage from '../../pages/problem/problem';
 import ProblemsPage from '../../pages/problems/problems';
 import SubmissionPage from '../../pages/submission/submission';
-import ContestEditPage from '../../pages/contest/edit';
 import NavBar, { NavLinkType } from '../NavBar/NavBar';
 import './App.scss';
 
@@ -51,6 +52,7 @@ const App = () => {
                 <Route path="/contest/:contestSlug/problem/:contestProblemSlug" exact component={ProblemPage} />
                 <Route path="/problems" exact component={ProblemsPage} />
                 <Route path="/problem/:problemSlug" exact component={ProblemPage} />
+                <Route path="/problem/:problemSlug/edit" exact component={ProblemEditPage} />
                 <Route path="/submission/:submissionID" exact component={SubmissionPage} />
                 <Route path="/login" exact component={LoginPage} />
                 <Route path="/logout" exact component={LogoutPage} />
