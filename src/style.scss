@@ -1,14 +1,35 @@
 @charset "utf-8";
 
+// Variables to use
 @import "~bulma/sass/utilities/initial-variables.sass";
 
 $family-sans-serif: BlinkMacSystemFont, -apple-system, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", "Helvetica", "Arial", sans-serif;
 $family-monospace: Consolas, monospace;
 
-$primary: $blue;
-$link: $turquoise;
+$rt-color-default: $grey-lightest;
+$rt-color-info: $blue;
+$rt-color-success: $green;
+$rt-color-warning: $yellow;
+$rt-color-error: $red;
+$rt-font-family: $family-sans-serif;
+$rt-toast-min-height: 56px;
 
+$primary: $blue;
+$link: $blue;
+
+// Libraries
+@import "~react-toastify/scss/main.scss";
 @import "~bulma/bulma.sass";
+
+.judge-toast {
+  border-radius: $radius-large;
+}
+
+.judge-toast pre {
+  white-space: pre-wrap;
+  background: inherit;
+  color: inherit;
+}
 
 .control-group {
   margin-bottom: 1em;

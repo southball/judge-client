@@ -1,8 +1,7 @@
-import * as moment from 'moment';
 import * as React from 'react';
 import { useHistory } from 'react-router';
+import NotFound from '../../components/NotFound/NotFound';
 import NowLoading from '../../components/NowLoading/NowLoading';
-import GlobalConfigContext from '../../contexts/GlobalConfigContext';
 import JWTContext from '../../contexts/JWTContext';
 import API, { Problem } from '../../models/API';
 
@@ -24,7 +23,8 @@ const ProblemsList = ({ problems }: ProblemsListProps) => {
             </thead>
             <tbody>
             {problems.map((problem) => (
-                <tr key={problem.id} onClick={() => history.push(`/problem/${problem.slug}`)} style={{ cursor: 'pointer' }}>
+                <tr key={problem.id} onClick={() => history.push(`/problem/${problem.slug}`)}
+                    style={{ cursor: 'pointer' }}>
                     <td>{problem.id}</td>
                     <td>{problem.slug}</td>
                     <td>{problem.title}</td>
@@ -37,18 +37,21 @@ const ProblemsList = ({ problems }: ProblemsListProps) => {
 
 const ProblemsPage = () => {
     const [problems, setProblems] = React.useState<Problem[]>();
+    const [notFound, setNotFound] = React.useState(false);
     const jwtContext = React.useContext(JWTContext);
 
     React.useEffect(() => {
-        API.withJWTContext(jwtContext).getProblems().then(setProblems);
+        API.withJWTContext(jwtContext).getProblems().then(setProblems).catch(() => setNotFound(true));
     }, []);
 
     return (
         <>
-            <h1 className="title is-3">Problems</h1>
+            <h1 className="title is-2">Problems</h1>
             {
                 typeof problems === 'undefined'
                     ? <NowLoading />
+                    : notFound
+                    ? <NotFound />
                     : <ProblemsList problems={problems} />
             }
         </>

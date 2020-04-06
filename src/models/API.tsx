@@ -88,8 +88,24 @@ export default class API {
         return response.data.data;
     }
 
+    public async getSubmissions(count: number, begin?: number): Promise<Submission[]> {
+        const response = await axios.get(API.resolveURL(`/submissions`), await this.jwtContext.withAuthorization({
+            params: {count, begin},
+        }));
+        if (!response.data.success)
+            throw response.data;
+        return response.data.data;
+    }
+
     public async getSubmission(submissionID: number): Promise<Submission> {
         const response = await axios.get(API.resolveURL(`/submission/${submissionID}`),await this.jwtContext.withAuthorization({}));
+        if (!response.data.success)
+            throw response.data;
+        return response.data.data;
+    }
+
+    public async rejudgeSubmission(submissionID: number): Promise<Submission> {
+        const response = await axios.post(API.resolveURL(`/submission/${submissionID}/rejudge`), {}, await this.jwtContext.withAuthorization({}));
         if (!response.data.success)
             throw response.data;
         return response.data.data;

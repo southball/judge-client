@@ -7,6 +7,7 @@ import NowLoading from '../../components/NowLoading/NowLoading';
 import JWTContext from '../../contexts/JWTContext';
 import API, { Contest, Problem } from '../../models/API';
 import './edit.scss';
+import {toast} from 'react-toastify';
 
 const ContestEditRender = ({ initialContest, initialProblems }: { initialContest: Contest, initialProblems: Problem[] }) => {
     const [contest, setContest] = React.useState(initialContest);
@@ -41,9 +42,27 @@ const ContestEditRender = ({ initialContest, initialProblems }: { initialContest
             if (newContest.slug !== initialContest.slug) {
                 history.push(`/contest/${newContest.slug}/edit`);
             }
+            console.log('Saved contest toast launching.');
+            toast.success(
+                <div>
+                    <i className="fas fa-save" /> Saved contest.
+                </div>
+            );
             setContest(newContest);
         } catch (err) {
             console.error(err);
+
+            const message = err?.response?.data?.message ?? err?.message ?? err.toString();
+
+            const additionalInformation = typeof err?.response?.data?.additionalInformation !== 'undefined'
+                ? <pre>{JSON.stringify(err?.response?.data?.additionalInformation, null, 2)}</pre>
+                : <></>;
+
+            toast.error(
+                <div>
+                    <i className="fas fa-exclamation-circle" /> Failed to save problem: {message} {additionalInformation}
+                </div>
+            );
         } finally {
             setFrozen(false);
         }

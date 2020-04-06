@@ -2,6 +2,7 @@ import * as moment from 'moment';
 import * as React from 'react';
 import { useHistory, useParams } from 'react-router';
 import { NavLink } from 'react-router-dom';
+import NotFound from '../../components/NotFound/NotFound';
 import NowLoading from '../../components/NowLoading/NowLoading';
 import GlobalConfigContext from '../../contexts/GlobalConfigContext';
 import JWTContext from '../../contexts/JWTContext';
@@ -77,15 +78,18 @@ const ContestRender = ({ contest }: any) => {
 const ContestPage = () => {
     const { contestSlug } = useParams();
     const [contest, setContest] = React.useState();
+    const [notFound, setNotFound] = React.useState(false);
     const jwtContext = React.useContext(JWTContext);
     const globalConfig = React.useContext(GlobalConfigContext);
 
     React.useEffect(() => {
-        API.withJWTContext(jwtContext).getContest(contestSlug as string).then(setContest);
+        API.withJWTContext(jwtContext).getContest(contestSlug as string).then(setContest).catch(() => setNotFound(true));
     }, []);
 
     return (
-        typeof contest === 'undefined'
+        notFound
+            ? <NotFound />
+            : typeof contest === 'undefined'
             ? <NowLoading />
             : <ContestRender contest={contest} />
     );

@@ -1,6 +1,8 @@
+import * as marked from 'marked';
 import * as React from 'react';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory, useParams } from 'react-router';
+import { toast } from 'react-toastify';
 import {
     Field,
     FieldRow,
@@ -11,7 +13,6 @@ import {
 import NowLoading from '../../components/NowLoading/NowLoading';
 import JWTContext from '../../contexts/JWTContext';
 import API, { Problem } from '../../models/API';
-import * as marked from 'marked';
 
 const ProblemEditRender = ({ initialProblem }: { initialProblem: Problem }) => {
     const [frozen, setFrozen] = useState(false);
@@ -19,7 +20,7 @@ const ProblemEditRender = ({ initialProblem }: { initialProblem: Problem }) => {
     const [compiledProblemStatement, setCompiledProblemStatement] = useState('');
     const [showPreview, setShowPreview] = useState(false);
     const jwtContext = useContext(JWTContext);
-const history = useHistory();
+    const history = useHistory();
 
     useEffect(() => {
         setProblem(initialProblem);
@@ -32,18 +33,43 @@ const history = useHistory();
 
     const save = async () => {
         setFrozen(true);
-        const newProblem = await API.withJWTContext(jwtContext).updateProblem(initialProblem.slug, problem);
-        if (newProblem.slug === initialProblem.slug)
-            setProblem(newProblem);
-        else
-            history.push(`/problem/${newProblem.slug}/edit`);
-        setFrozen(false);
+        try {
+            const newProblem = await API.withJWTContext(jwtContext).updateProblem(initialProblem.slug, problem);
+            if (newProblem.slug === initialProblem.slug)
+                setProblem(newProblem);
+            else
+                history.push(`/problem/${newProblem.slug}/edit`);
+
+            toast.success(
+                <div>
+                    <i className="fas fa-save" /> Saved problem.
+                </div>,
+            );
+        } catch (err) {
+            console.error(err);
+
+            const message = err?.response?.data?.message ?? err?.message ?? err.toString();
+
+            const additionalInformation = typeof err?.response?.data?.additionalInformation !== 'undefined'
+                ? <pre>{JSON.stringify(err?.response?.data?.additionalInformation, null, 2)}</pre>
+                : <></>;
+
+            toast.error(
+                <div>
+                    <i className="fas fa-exclamation-circle" /> Failed to save problem: {message} {additionalInformation}
+                </div>
+            );
+        } finally {
+            setFrozen(false);
+        }
     };
 
-    const onFieldChange = (field: keyof Problem) => <T extends { target: { value: K } }, K>(event: T): void => {
+    const onFieldChange = <T extends { target: { value: K } }, K, Q = K>(field: keyof Problem, postprocessing: (k: K) => Q = ((x: K & Q) => x)) => (
+        event: T
+    ): void => {
         setProblem({
             ...problem,
-            [field]: event.target.value,
+            [field]: postprocessing(event.target.value),
         });
     };
 
@@ -92,8 +118,8 @@ const history = useHistory();
                         <input
                             className="input"
                             disabled={frozen}
-                            type="text"
-                            onChange={onFieldChange('time_limit')}
+                            type="number"
+                            onChange={onFieldChange('time_limit', (x: string) => +x)}
                             defaultValue={problem.time_limit} />
                     </Field>
                     <Field className="column" description="Memory Limit (KB)">
@@ -111,8 +137,8 @@ const history = useHistory();
                         <input
                             className="input"
                             disabled={frozen}
-                            type="text"
-                            onChange={onFieldChange('compile_time_limit')}
+                            type="number"
+                            onChange={onFieldChange('compile_time_limit', (x: string) => +x)}
                             defaultValue={problem.compile_time_limit} />
                     </Field>
                     <Field className="column" description="Compile Memory Limit (KB)">
@@ -127,8 +153,8 @@ const history = useHistory();
                         <input
                             className="input"
                             disabled={frozen}
-                            type="text"
-                            onChange={onFieldChange('checker_time_limit')}
+                            type="number"
+                            onChange={onFieldChange('checker_time_limit', (x: string) => +x)}
                             defaultValue={problem.checker_time_limit} />
                     </Field>
                     <Field className="column" description="Checker Memory Limit (KB)">

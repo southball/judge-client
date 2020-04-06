@@ -4,29 +4,17 @@ import AceEditor from 'react-ace';
 import { useParams } from 'react-router';
 import { NavLink } from 'react-router-dom';
 import * as io from 'socket.io-client';
+import NotFound from '../../components/NotFound/NotFound';
 import NowLoading from '../../components/NowLoading/NowLoading';
+import Verdict from '../../components/Verdict/Verdict';
 import GlobalConfigContext from '../../contexts/GlobalConfigContext';
 import JWTContext from '../../contexts/JWTContext';
 import API, { Submission } from '../../models/API';
+import NotFoundPage from '../not-found/not-found';
 
 interface SubmissionUpdateEvent {
     progress: number;
     total: number;
-}
-
-const SubmissionVerdict = ({ verdict }: { verdict: string }) => {
-    const verdictClass =
-        verdict === 'AC'
-            ? 'is-success'
-            : /^\d+ \/ \d+$/.test(verdict) || verdict === 'WJ'
-            ? ''
-            : 'is-danger';
-
-    return (
-        <span className={`tag ${verdictClass}`}>
-            {verdict}
-        </span>
-    );
 }
 
 const SubmissionRender = ({ submission }: { submission: Submission }) => {
@@ -56,15 +44,15 @@ const SubmissionRender = ({ submission }: { submission: Submission }) => {
                 </tr>
                 <tr>
                     <th>Verdict</th>
-                    <td><SubmissionVerdict verdict={submission.verdict} /></td>
+                    <td><Verdict verdict={submission.verdict} /></td>
                 </tr>
                 <tr>
                     <th>Time</th>
-                    <td>{submission.time} s</td>
+                    <td>{submission.time && `${submission.time} s`}</td>
                 </tr>
                 <tr>
                     <th>Memory</th>
-                    <td>{submission.memory} KB</td>
+                    <td>{submission.memory && `${submission.memory} KB`}</td>
                 </tr>
                 </tbody>
             </table>
@@ -86,12 +74,15 @@ const SubmissionRender = ({ submission }: { submission: Submission }) => {
 const SubmissionPage = () => {
     const { submissionID } = useParams();
     const [submission, setSubmission] = useState<Submission>();
+    const [notFound, setNotFound] = useState(false);
+    const [lastRejudgeTime, setLastRejudgeTime] = useState(new Date());
     const jwtContext = useContext(JWTContext);
     const globalContext = useContext(GlobalConfigContext);
 
     // Ensure that only newer submission status is set.
     const [lastFetchId, setLastFetchId] = useState<number>(-1);
     const [accumulatedFetchId, setAccumulatedFetchId] = useState<number>(0);
+
     function refetchSubmission() {
         const fetchId = accumulatedFetchId + 1;
         setAccumulatedFetchId(fetchId);
@@ -102,7 +93,7 @@ const SubmissionPage = () => {
             if (fetchId > lastFetchId) {
                 setLastFetchId(fetchId);
                 const verdict = newSubmission.verdict !== 'WJ' || newSubmission.testcases === null ? newSubmission.verdict : (() => {
-                    const progress = newSubmission.testcases.filter((testcase: any) => testcase.verdict !== "WJ");
+                    const progress = newSubmission.testcases.filter((testcase: any) => testcase.verdict !== 'WJ');
                     const total = newSubmission.testcases.length;
                     return `${progress} / ${total}`;
                 })();
@@ -112,7 +103,7 @@ const SubmissionPage = () => {
                     verdict,
                 });
             }
-        });
+        }).catch(() => setNotFound(true));
     }
 
     useEffect(() => {
@@ -141,7 +132,7 @@ const SubmissionPage = () => {
                     refetchSubmission();
                 } else {
                     if (event.progress !== event.total)
-                        setSubmission({...submission, verdict: `${event.progress} / ${event.total}`});
+                        setSubmission({ ...submission, verdict: `${event.progress} / ${event.total}` });
                     else
                         refetchSubmission();
                 }
@@ -158,14 +149,30 @@ const SubmissionPage = () => {
                 socket.disconnect();
             }
         }
-    }, []);
+    }, [lastRejudgeTime]);
+
+    const rejudge = async () => {
+        setSubmission(undefined);
+        await API.withJWTContext(jwtContext).rejudgeSubmission(parseInt(submissionID as string))
+            .then(setSubmission)
+            .catch(() => setNotFound(true));
+        setLastRejudgeTime(new Date());
+    };
 
     return (
         <div>
-            <h1 className="title is-3">Submission {submissionID}</h1>
+            <h1 className="title is-2">Submission {submissionID}</h1>
+            {
+                jwtContext.hasPermission('admin') &&
+                    <div className="control-group">
+                        <button className="button is-warning" onClick={rejudge}>Rejudge</button>
+                    </div>
+            }
             <hr />
             {
-                typeof submission === 'undefined'
+                notFound
+                    ? <NotFound />
+                    : typeof submission === 'undefined'
                     ? <NowLoading />
                     : <SubmissionRender submission={submission} />
             }

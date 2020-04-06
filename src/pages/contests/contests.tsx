@@ -43,7 +43,7 @@ const ContestsPage = () => {
 
     return (
         <>
-            <h1 className="title is-3">Contests</h1>
+            <h1 className="title is-2">Contests</h1>
             {
                 typeof contests === 'undefined'
                     ? <NowLoading />

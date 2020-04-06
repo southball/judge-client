@@ -50,7 +50,7 @@ const LoginPage = () => {
 
     return (
         <>
-            <h1 className="title is-3">Login</h1>
+            <h1 className="title is-2">Login</h1>
             <hr />
 
             <ErrorNotification show={errorMessage.length > 0}>

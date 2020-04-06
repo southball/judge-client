@@ -2,6 +2,7 @@ import * as React from 'react';
 import { useHistory, useParams } from 'react-router';
 import { NavLink } from 'react-router-dom';
 import { ReactAceHelper } from '../../components/FormHelper/FormHelper';
+import NotFound from '../../components/NotFound/NotFound';
 import NowLoading from '../../components/NowLoading/NowLoading';
 import JWTContext from '../../contexts/JWTContext';
 import API, { Contest, Problem, SubmissionID } from '../../models/API';
@@ -10,6 +11,7 @@ import AceEditor from 'react-ace';
 import Select from 'react-select';
 
 import './problem.scss';
+import NotFoundPage from '../not-found/not-found';
 
 type SelectOption = { value: string, label: string };
 type SubmitFunction = (language: string, sourceCode: string) => any;
@@ -105,15 +107,16 @@ const ProblemPage = () => {
     const jwtContext = React.useContext(JWTContext);
     const [contest, setContest] = React.useState();
     const [problem, setProblem] = React.useState();
+    const [notFound, setNotFound] = React.useState(false);
     const history = useHistory();
 
     React.useEffect(() => {
         const api = API.withJWTContext(jwtContext);
         if (problemSlug) {
-            api.getProblem(problemSlug).then(setProblem);
+            api.getProblem(problemSlug).then(setProblem).catch(() => setNotFound(true));
         } else if (contestSlug && contestProblemSlug) {
-            api.getContest(contestSlug).then(setContest);
-            api.getContestProblem(contestSlug, contestProblemSlug).then(setProblem);
+            api.getContest(contestSlug).then(setContest).catch(() => setNotFound(true));
+            api.getContestProblem(contestSlug, contestProblemSlug).then(setProblem).catch(() => setNotFound(true));
         }
     }, []);
 
@@ -130,7 +133,9 @@ const ProblemPage = () => {
     };
 
     return (
-        typeof problem === 'undefined'
+        notFound
+            ? <NotFound />
+            : typeof problem === 'undefined'
             ? <NowLoading />
             : <ProblemRender contest={contest} problem={problem} submit={submit} />
     );
