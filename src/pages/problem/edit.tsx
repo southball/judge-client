@@ -1,8 +1,8 @@
 import * as marked from 'marked';
 import * as React from 'react';
-import { useContext, useEffect, useState } from 'react';
-import { useHistory, useParams } from 'react-router';
-import { toast } from 'react-toastify';
+import {useContext, useEffect, useState} from 'react';
+import {useHistory, useParams} from 'react-router';
+import {toast} from 'react-toastify';
 import {
     Field,
     FieldRow,
@@ -12,18 +12,22 @@ import {
 } from '../../components/FormHelper/FormHelper';
 import NowLoading from '../../components/NowLoading/NowLoading';
 import JWTContext from '../../contexts/JWTContext';
-import API, { Problem } from '../../models/API';
+import API, {Problem} from '../../models/API';
+import set = Reflect.set;
 
-const ProblemEditRender = ({ initialProblem }: { initialProblem: Problem }) => {
+const ProblemEditRender = ({initialProblem}: { initialProblem: Problem }) => {
     const [frozen, setFrozen] = useState(false);
     const [problem, setProblem] = useState(initialProblem);
     const [compiledProblemStatement, setCompiledProblemStatement] = useState('');
     const [showPreview, setShowPreview] = useState(false);
+    const [testcases, setTestcases] = useState(initialProblem.testcases);
+    const [showTestcases, setShowTestcases] = useState(false);
     const jwtContext = useContext(JWTContext);
     const history = useHistory();
 
     useEffect(() => {
         setProblem(initialProblem);
+        setTestcases(initialProblem.testcases);
     }, [initialProblem]);
 
     useEffect(() => {
@@ -56,8 +60,9 @@ const ProblemEditRender = ({ initialProblem }: { initialProblem: Problem }) => {
 
             toast.error(
                 <div>
-                    <i className="fas fa-exclamation-circle" /> Failed to save problem: {message} {additionalInformation}
-                </div>
+                    <i className="fas fa-exclamation-circle" /> Failed to save
+                    problem: {message} {additionalInformation}
+                </div>,
             );
         } finally {
             setFrozen(false);
@@ -65,12 +70,39 @@ const ProblemEditRender = ({ initialProblem }: { initialProblem: Problem }) => {
     };
 
     const onFieldChange = <T extends { target: { value: K } }, K, Q = K>(field: keyof Problem, postprocessing: (k: K) => Q = ((x: K & Q) => x)) => (
-        event: T
+        event: T,
     ): void => {
         setProblem({
             ...problem,
             [field]: postprocessing(event.target.value),
         });
+    };
+
+    const [file, setFile] = useState<ArrayBuffer>();
+    const onTestcasesFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+
+        if (!file)
+            return;
+
+        const fileReader = new FileReader();
+        fileReader.onloadend = () => {
+            setFile(fileReader.result as ArrayBuffer);
+        };
+        fileReader.readAsArrayBuffer(file);
+    };
+
+    const uploadTestcases = async () => {
+        if (file) {
+            setFrozen(true);
+            try {
+                const response = await API.withJWTContext(jwtContext).uploadTestcases(initialProblem.slug, file);
+                setTestcases(response.testcases);
+            } catch (err) {
+                console.error(err);
+            }
+            setFrozen(false);
+        }
     };
 
     return (
@@ -108,8 +140,8 @@ const ProblemEditRender = ({ initialProblem }: { initialProblem: Problem }) => {
                         <ReactSelectHelper
                             disabled={frozen}
                             options={[
-                                { value: 'standard', label: 'Standard' },
-                                { value: 'interactive', label: 'Interactive' },
+                                {value: 'standard', label: 'Standard'},
+                                {value: 'interactive', label: 'Interactive'},
                             ]}
                             onChange={onFieldChange('type')}
                             value={problem.type} />
@@ -186,8 +218,8 @@ const ProblemEditRender = ({ initialProblem }: { initialProblem: Problem }) => {
                         <Field className="column" description="Statement Preview">
                             <div
                                 className="content"
-                                dangerouslySetInnerHTML={{ __html: compiledProblemStatement }}
-                                style={{ padding: '0.75rem', border: '1px solid #000000' }} />
+                                dangerouslySetInnerHTML={{__html: compiledProblemStatement}}
+                                style={{padding: '0.75rem', border: '1px solid #000000'}} />
                         </Field>
                     }
                 </FieldRow>
@@ -216,8 +248,72 @@ const ProblemEditRender = ({ initialProblem }: { initialProblem: Problem }) => {
                         className="button is-primary"
                         disabled={frozen}
                         onClick={save}
-                        style={{ margin: '0 0.75rem' }}>
+                        style={{margin: '0 0.75rem'}}>
                         Save
+                    </button>
+                </FieldRow>
+
+                <hr />
+
+                <FieldRow style={{margin: 'inherit'}}>
+                    <article className="message" style={{width: '100%'}}>
+                        <div className="message-header" style={{cursor: 'pointer'}}
+                             onClick={() => setShowTestcases(!showTestcases)}>
+                            <p>
+                                Testcases (Click to {!showTestcases ? 'show' : 'collapse'})
+                            </p>
+                        </div>
+                        {
+                            showTestcases &&
+                            <div className="message-body">
+                                <table className="table is-fullwidth is-hoverable">
+                                    <thead>
+                                    <tr>
+                                        <th>In</th>
+                                        <th>Out</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {testcases.map(([inFile, outFile]: [string, string]) => (
+                                        <tr>
+                                            <td>{inFile}</td>
+                                            <td>{outFile}</td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </article>
+                </FieldRow>
+
+                <FieldRow>
+                    <Field className="column" description="Testcases Upload">
+                        <input
+                            type="file"
+                            accept=".zip"
+                            multiple={false}
+                            disabled={frozen}
+                            onChange={onTestcasesFileChange}
+                        />
+                    </Field>
+                </FieldRow>
+
+                <FieldRow style={{margin: '0'}}>
+                    File information: {
+                    !file
+                        ? `no file uploaded`
+                        : `file of ${file.byteLength} bytes`
+                }
+                </FieldRow>
+
+                <FieldRow style={{margin: '0'}}>
+                    <button
+                        type="button"
+                        className="button is-primary"
+                        onClick={uploadTestcases}
+                        disabled={!file || frozen}>
+                        Upload Testcases
                     </button>
                 </FieldRow>
             </form>
@@ -226,7 +322,7 @@ const ProblemEditRender = ({ initialProblem }: { initialProblem: Problem }) => {
 }
 
 const ProblemEditPage = () => {
-    const { problemSlug } = useParams();
+    const {problemSlug} = useParams();
     const jwtContext = React.useContext(JWTContext);
     const [problem, setProblem] = React.useState<Problem>();
 

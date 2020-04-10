@@ -10,8 +10,8 @@ export interface FieldProps {
     children?: any;
 }
 
-export const FieldRow = ({ children }: { children: any }) => (
-    <div className="columns form-field-row">{children}</div>
+export const FieldRow = ({ children, ...props }: { children: any, [key: string]: any }) => (
+    <div className="columns form-field-row" {...props}>{children}</div>
 );
 
 export const Field = ({ className, children, description }: FieldProps) => (

@@ -1,9 +1,9 @@
 import axios from 'axios';
-import { JWTContextProps } from '../contexts/JWTContext';
+import {JWTContextProps} from '../contexts/JWTContext';
 
 export type Problem = any;
 export type Contest = any;
-export type SubmissionID = {id: number};
+export type SubmissionID = { id: number };
 export type Submission = any;
 
 export default class API {
@@ -98,7 +98,7 @@ export default class API {
     }
 
     public async getSubmission(submissionID: number): Promise<Submission> {
-        const response = await axios.get(API.resolveURL(`/submission/${submissionID}`),await this.jwtContext.withAuthorization({}));
+        const response = await axios.get(API.resolveURL(`/submission/${submissionID}`), await this.jwtContext.withAuthorization({}));
         if (!response.data.success)
             throw response.data;
         return response.data.data;
@@ -106,6 +106,17 @@ export default class API {
 
     public async rejudgeSubmission(submissionID: number): Promise<Submission> {
         const response = await axios.post(API.resolveURL(`/submission/${submissionID}/rejudge`), {}, await this.jwtContext.withAuthorization({}));
+        if (!response.data.success)
+            throw response.data;
+        return response.data.data;
+    }
+
+    public async uploadTestcases(problemSlug: string, testcasesZipFile: ArrayBuffer): Promise<any> {
+        const response = await axios.put(
+            API.resolveURL(`/problem/${problemSlug}/testcases`),
+            testcasesZipFile,
+            await this.jwtContext.withAuthorization({headers: {'Content-Type': 'application/zip'}}),
+        );
         if (!response.data.success)
             throw response.data;
         return response.data.data;

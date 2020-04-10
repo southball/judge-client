@@ -1,15 +1,15 @@
 import * as React from 'react';
-import { useContext, useEffect, useState } from 'react';
+import {useContext, useEffect, useState} from 'react';
 import AceEditor from 'react-ace';
-import { useParams } from 'react-router';
-import { NavLink } from 'react-router-dom';
+import {useParams} from 'react-router';
+import {NavLink} from 'react-router-dom';
 import * as io from 'socket.io-client';
 import NotFound from '../../components/NotFound/NotFound';
 import NowLoading from '../../components/NowLoading/NowLoading';
 import Verdict from '../../components/Verdict/Verdict';
 import GlobalConfigContext from '../../contexts/GlobalConfigContext';
 import JWTContext from '../../contexts/JWTContext';
-import API, { Submission } from '../../models/API';
+import API, {Submission} from '../../models/API';
 import NotFoundPage from '../not-found/not-found';
 
 interface SubmissionUpdateEvent {
@@ -17,10 +17,25 @@ interface SubmissionUpdateEvent {
     total: number;
 }
 
-const SubmissionRender = ({ submission }: { submission: Submission }) => {
+const SubmissionRender = ({submission}: { submission: Submission }) => {
+    const jwtContext = useContext(JWTContext);
+    const isAdmin = jwtContext.hasPermission('admin');
+
     return (
         <div>
-            <table className="table is-narrow is-hoverable is-fullwidth">
+            <h2 className="title is-3">Source Code</h2>
+
+            <AceEditor
+                width="100%"
+                height="500px"
+                value={submission.source_code}
+                setOptions={{readOnly: true}}
+            />
+
+            <hr />
+            <h2 className="title is-3">Verdict</h2>
+
+            <table className="table is-bordered is-hoverable is-fullwidth">
                 <tbody>
                 <tr>
                     <th>User</th>
@@ -54,25 +69,62 @@ const SubmissionRender = ({ submission }: { submission: Submission }) => {
                     <th>Memory</th>
                     <td>{submission.memory && `${submission.memory} KB`}</td>
                 </tr>
+                <tr>
+                    <td colSpan={2} style={{padding: '0'}}>
+                        <table className="table is-fullwidth is-hoverable is-bordered-nested">
+                            <thead>
+                            <tr>
+                                <th colSpan={isAdmin ? 6 : 4}>Testcases</th>
+                            </tr>
+                            <tr>
+                                <th>Test</th>
+                                <th>Verdict</th>
+                                <th>Time</th>
+                                <th>Memory</th>
+                                {
+                                    isAdmin &&
+                                    <>
+                                        <th>Checker</th>
+                                        <th>Isolate</th>
+                                    </>
+                                }
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {
+                                submission?.testcases?.map((testcase: any, index: number) => (
+                                    <>
+                                        <tr>
+                                            <td>{index + 1}</td>
+                                            <td><Verdict verdict={testcase.verdict} /></td>
+                                            <td>{testcase.time} s</td>
+                                            <td>{testcase.memory} KB</td>
+                                            {
+                                                isAdmin &&
+                                                <>
+                                                    <td><pre><code>{testcase.checker_output}</code></pre></td>
+                                                    <td><pre><code>{testcase.sandbox_output}</code></pre></td>
+                                                </>
+                                            }
+                                        </tr>
+                                    </>
+                                ))
+                                || <tr>
+                                    <td colSpan={4}>Judging...</td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </td>
+                </tr>
                 </tbody>
             </table>
-
-            <h2 className="title is-3">Source Code</h2>
-
-            <AceEditor
-                width="100%"
-                height="500px"
-                value={submission.source_code}
-                setOptions={{ readOnly: true }}
-            />
-            <pre>{JSON.stringify(submission, null, 4)}</pre>
-
         </div>
     )
 };
 
 const SubmissionPage = () => {
-    const { submissionID } = useParams();
+    const {submissionID} = useParams();
     const [submission, setSubmission] = useState<Submission>();
     const [notFound, setNotFound] = useState(false);
     const [lastRejudgeTime, setLastRejudgeTime] = useState(new Date());
@@ -132,7 +184,7 @@ const SubmissionPage = () => {
                     refetchSubmission();
                 } else {
                     if (event.progress !== event.total)
-                        setSubmission({ ...submission, verdict: `${event.progress} / ${event.total}` });
+                        setSubmission({...submission, verdict: `${event.progress} / ${event.total}`});
                     else
                         refetchSubmission();
                 }
@@ -164,9 +216,9 @@ const SubmissionPage = () => {
             <h1 className="title is-2">Submission {submissionID}</h1>
             {
                 jwtContext.hasPermission('admin') &&
-                    <div className="control-group">
-                        <button className="button is-warning" onClick={rejudge}>Rejudge</button>
-                    </div>
+                <div className="control-group">
+                    <button className="button is-warning" onClick={rejudge}>Rejudge</button>
+                </div>
             }
             <hr />
             {
