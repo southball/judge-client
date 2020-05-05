@@ -15,6 +15,7 @@ import ProblemPage from '../../pages/problem/problem';
 import ProblemsPage from '../../pages/problems/problems';
 import SubmissionPage from '../../pages/submission/submission';
 import SubmissionsPage from '../../pages/submissions/submissions';
+import RegisterPage from '../../pages/register/register';
 import NavBar, { NavLinkType } from '../NavBar/NavBar';
 import './App.scss';
 import { ToastContainer, Flip } from 'react-toastify';
@@ -42,7 +43,7 @@ const NavBarRight = (NavLink: NavLinkType) => {
 
     return (
         !authenticated
-            ? <NavLink to="/login">Login</NavLink>
+            ? <NavLink to="/login">Login / Register</NavLink>
             : <NavLink to="/logout">Logout</NavLink>
     )
 };
@@ -73,7 +74,10 @@ const App = () => {
 
                     {
                         !jwtContext.loggedIn()
-                            ? <Route path="/login" exact component={LoginPage} />
+                            ? <>
+                                <Route path="/login" exact component={LoginPage} />
+                                <Route path="/register" exact component={RegisterPage} />
+                            </>
                             : <Route path="/logout" exact component={LogoutPage} />
                     }
 

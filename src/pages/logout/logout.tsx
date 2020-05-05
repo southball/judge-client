@@ -6,18 +6,16 @@ const LogoutPage = () => {
     const jwtContext = React.useContext(JWTContext);
     const history = useHistory();
 
-    function logout() {
-        jwtContext.set({
-            accessToken: undefined,
-            refreshToken: undefined,
-        });
+    jwtContext.set({
+        accessToken: undefined,
+        refreshToken: undefined,
+    });
 
-        history.push('/');
-    }
+    history.push('/');
 
     return (
         <div>
-            <button className="button" onClick={logout}>Logout</button>
+            Logging out...
         </div>
     );
 };

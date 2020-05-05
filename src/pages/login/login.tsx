@@ -1,10 +1,11 @@
 import { FormEvent } from 'react';
 import * as React from 'react';
-import axios from 'axios';
 import { useHistory } from 'react-router';
 import ErrorNotification from '../../components/ErrorNotification/ErrorNotification';
 import GlobalConfigContext from '../../contexts/GlobalConfigContext';
 import JWTContext from '../../contexts/JWTContext';
+import { Link } from 'react-router-dom';
+import API from '../../models/API';
 
 const LoginPage = () => {
     const EMPTY_STATE = { username: '', password: '' };
@@ -27,25 +28,20 @@ const LoginPage = () => {
 
         setFrozen(true);
 
-        const response = await axios.post(loginUrl, {
-            username: state.username,
-            password: state.password,
-        });
-
-        console.log(response);
-
-        if (response.data.success) {
+        try {
+            const response = await API.noContext().login(state.username, state.password);
             setState(EMPTY_STATE);
             jwtContext.set({
-                accessToken: response.data.data.access_token,
-                refreshToken: response.data.data.refresh_token,
+                accessToken: response.access_token,
+                refreshToken: response.refresh_token,
             });
             history.push("/");
-        } else {
+        } catch (err) {
+            console.error(err);
             setErrorMessage('Wrong username or password.');
+        } finally {
+            setFrozen(false);
         }
-
-        setFrozen(false);
     }
 
     return (
@@ -78,6 +74,10 @@ const LoginPage = () => {
 
                 <button type="submit" className="button is-primary">Submit</button>
             </form>
+
+            <hr />
+
+            <p>No account yet? <Link to="/register">Register</Link> one.</p>
         </>
     );
 };
