@@ -16,6 +16,9 @@ import ProblemsPage from '../../pages/problems/problems';
 import SubmissionPage from '../../pages/submission/submission';
 import SubmissionsPage from '../../pages/submissions/submissions';
 import RegisterPage from '../../pages/register/register';
+import UsersPage from '../../pages/users/users';
+import UserPage from '../../pages/user/user';
+import UserEditPage from '../../pages/user/edit';
 import NavBar, { NavLinkType } from '../NavBar/NavBar';
 import './App.scss';
 import { ToastContainer, Flip } from 'react-toastify';
@@ -29,10 +32,11 @@ const NavBarLeft = (NavLink: NavLinkType) => {
             <NavLink to="/contests">Contests</NavLink>
             <NavLink to="/problems">Problems</NavLink>
             <NavLink to="/submissions">Submissions</NavLink>
-            {
+            <NavLink to="/users">Users</NavLink>
+            {/*
                 jwtContext.hasPermission('admin') &&
                 <NavLink to="/admin">Admin</NavLink>
-            }
+            */}
         </>
     );
 };
@@ -44,7 +48,10 @@ const NavBarRight = (NavLink: NavLinkType) => {
     return (
         !authenticated
             ? <NavLink to="/login">Login / Register</NavLink>
-            : <NavLink to="/logout">Logout</NavLink>
+            : <>
+                <NavLink to={`/user/${jwtContext.getUsername()}`}>Profile</NavLink>
+                <NavLink to="/logout">Logout</NavLink>
+            </>
     )
 };
 
@@ -72,6 +79,10 @@ const App = () => {
                     <Route path="/submissions" exact component={SubmissionsPage} />
                     <Route path="/submission/:submissionID" exact component={SubmissionPage} />
 
+                    <Route path="/users" exact component={UsersPage} />
+                    <Route path="/user/:username" exact component={UserPage} />
+                    <Route path="/user/:username/edit" exact component={UserEditPage} />
+
                     {
                         !jwtContext.loggedIn()
                             ? <>
@@ -81,10 +92,10 @@ const App = () => {
                             : <Route path="/logout" exact component={LogoutPage} />
                     }
 
-                    {
+                    {/*
                         jwtContext.hasPermission('admin') &&
                         <Route path="/admin" exact component={AdminPage} />
-                    }
+                    */}
 
                     <Route path="*" component={NotFoundPage} />
                 </Switch>

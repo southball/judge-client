@@ -3,6 +3,8 @@ import GlobalConfigContext from './GlobalConfigContext';
 import axios from 'axios';
 import * as Axios from 'axios';
 import * as jsonwebtoken from 'jsonwebtoken';
+import { useContext } from 'react';
+import If from '../components/If/If';
 
 const LOCAL_STORAGE_KEY = "JUDGE_AUTH";
 
@@ -21,6 +23,7 @@ export interface JWTContextProps {
     // Add authorization to header if possible.
     withAuthorization: (header: Axios.AxiosRequestConfig) => Promise<Axios.AxiosRequestConfig>;
     hasPermission: (requiredPermission: string) => boolean;
+    getUsername: () => string;
 }
 
 const JWTContext = React.createContext({} as JWTContextProps);
@@ -43,6 +46,7 @@ export const JWTContextController = ({ children, ...props }: any) => {
 
         return {};
     })());
+
     const globalConfig = React.useContext(GlobalConfigContext);
 
     async function getAccessToken(): Promise<string | undefined> {
@@ -83,7 +87,7 @@ export const JWTContextController = ({ children, ...props }: any) => {
     }
 
     function proxiedSetState(newState: Partial<JWTContextState>) {
-        const stateDelta = {...state, ...transformedState(newState)};
+        const stateDelta = { ...state, ...transformedState(newState) };
 
         setState(stateDelta);
 
@@ -110,10 +114,14 @@ export const JWTContextController = ({ children, ...props }: any) => {
         };
     }
 
-    function hasPermission(requiredPermission: string) {
+    function hasPermission(requiredPermission: string): boolean {
         return typeof state.accessToken === 'undefined'
             ? false
             : state.accessTokenData.permissions.some((permission: string) => permission === requiredPermission);
+    }
+
+    function getUsername(): string | null {
+        return state?.accessTokenData?.username;
     }
 
     return (
@@ -124,10 +132,16 @@ export const JWTContextController = ({ children, ...props }: any) => {
             loggedIn,
             withAuthorization,
             hasPermission,
+            getUsername,
         }} {...props}>
             {children}
         </JWTContext.Provider>
     );
+};
+
+export const IfAdmin = ({ children }: { children: React.ReactNode }) => {
+    const jwtContext = useContext(JWTContext);
+    return <If condition={jwtContext.hasPermission('admin')}>{children}</If>
 };
 
 export default JWTContext;

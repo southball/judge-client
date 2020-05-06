@@ -33,13 +33,14 @@ export interface ReactSelectHelperProps<ValueType, LabelType = string> {
 }
 
 export const ReactSelectHelper =
-    <ValueType, LabelType = string>({ disabled, options, onChange, value }: ReactSelectHelperProps<ValueType, LabelType>) => {
+    <ValueType, LabelType = string>({ disabled, options, onChange, value, ...props }: ReactSelectHelperProps<ValueType, LabelType>) => {
         return (
             <Select
                 isDisabled={disabled ?? false}
                 onChange={({ value }: { value: ValueType }) => onChange?.({ target: { value } })}
                 options={options}
                 value={options.find((option) => option.value === value)}
+                {...props}
             />
         )
     };

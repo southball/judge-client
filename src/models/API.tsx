@@ -5,6 +5,7 @@ export type Problem = any;
 export type Contest = any;
 export type SubmissionID = { id: number };
 export type Submission = any;
+export type User = any;
 
 export default class API {
     private jwtContext: JWTContextProps;
@@ -121,6 +122,34 @@ export default class API {
             API.resolveURL(`/problem/${problemSlug}/submit`),
             { language: language, source_code: sourceCode },
             await this.jwtContext.withAuthorization({}));
+        if (!response.data.success)
+            throw response.data;
+        return response.data.data;
+    }
+
+    public async getUsers(): Promise<User[]> {
+        const response = await axios.get(API.resolveURL(`/users`));
+        if (!response.data.success)
+            throw response.data;
+        return response.data.data;
+    }
+
+    public async getUser(username: string): Promise<User> {
+        const response = await axios.get(
+            API.resolveURL(`/user/${username}`),
+            await this.jwtContext.withAuthorization({}),
+        );
+        if (!response.data.success)
+            throw response.data;
+        return response.data.data;
+    }
+
+    public async updateUser(username: string, newUser: User): Promise<User> {
+        const response = await axios.put(
+            API.resolveURL(`/user/${username}`),
+            newUser,
+            await this.jwtContext.withAuthorization({}),
+        );
         if (!response.data.success)
             throw response.data;
         return response.data.data;

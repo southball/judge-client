@@ -43,7 +43,7 @@ const SubmissionList = () => {
                     </thead>
                     <tbody>
                     {submissions.map((submission) => (
-                        <tr>
+                        <tr key={submission.id}>
                             <td><NavLink to={`/submission/${submission.id}`}>{submission.id}</NavLink></td>
                             <td><NavLink to={`/user/${submission.username}`}>{submission.username}</NavLink></td>
                             <td><NavLink to={submissionProblemURL(submission)}>{submissionProblemTitle(submission)}</NavLink></td>
