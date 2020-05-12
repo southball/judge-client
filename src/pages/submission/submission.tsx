@@ -186,14 +186,16 @@ const SubmissionPage = () => {
             });
 
             socket.on(eventName, (event: SubmissionUpdateEvent) => {
-                if (jwtContext.hasPermission('admin')) {
+                // if (jwtContext.hasPermission('admin')) {
+                //     refetchSubmission();
+                // } else {
+                // TODO consider partial submission fetch for admin
+                console.log(event);
+                if (event.progress !== event.total)
+                    setSubmission({ ...submission, verdict: `${event.progress} / ${event.total}` });
+                else
                     refetchSubmission();
-                } else {
-                    if (event.progress !== event.total)
-                        setSubmission({ ...submission, verdict: `${event.progress} / ${event.total}` });
-                    else
-                        refetchSubmission();
-                }
+                // }
 
                 if (event.progress === event.total)
                     socket.disconnect();
