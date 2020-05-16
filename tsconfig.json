@@ -4,6 +4,10 @@
     "target": "ES6",
     "noImplicitAny": true,
     "moduleResolution": "node",
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["./*"]
+    }
   }
 }

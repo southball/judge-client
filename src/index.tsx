@@ -1,6 +1,6 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import App from './components/App/App';
+import App from './components/App';
 import { GlobalConfigContextController } from './contexts/GlobalConfigContext';
 import { JWTContextController } from './contexts/JWTContext';
 import Router from './routers/Router';
@@ -14,12 +14,12 @@ import '@fortawesome/fontawesome-free/scss/brands.scss';
 import 'ace-builds/webpack-resolver';
 
 ReactDOM.render(
-    <GlobalConfigContextController>
-        <JWTContextController>
-            <Router>
-                <App />
-            </Router>
-        </JWTContextController>
-    </GlobalConfigContextController>,
-    document.getElementById('root'),
+  <GlobalConfigContextController>
+    <JWTContextController>
+      <Router>
+        <App />
+      </Router>
+    </JWTContextController>
+  </GlobalConfigContextController>,
+  document.getElementById('root'),
 );
