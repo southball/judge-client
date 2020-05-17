@@ -31,7 +31,7 @@ const ProblemEditRender = ({ initialProblem }: { initialProblem: Problem }) => {
   const save = async () => {
     setFrozen(true);
     try {
-      const newProblem = await API.withJWTContext(jwtContext).updateProblem(initialProblem.slug, problem);
+      const newProblem = await new API(jwtContext).updateProblem(initialProblem.slug, problem);
       if (newProblem.slug === initialProblem.slug) setProblem(newProblem);
       else history.push(`/problem/${newProblem.slug}/edit`);
 
@@ -89,7 +89,7 @@ const ProblemEditRender = ({ initialProblem }: { initialProblem: Problem }) => {
     if (file) {
       setFrozen(true);
       try {
-        const response = await API.withJWTContext(jwtContext).uploadTestcases(initialProblem.slug, file);
+        const response = await new API(jwtContext).uploadTestcases(initialProblem.slug, file);
         setTestcases(response.testcases);
       } catch (err) {
         console.error(err);
@@ -258,6 +258,18 @@ const ProblemEditRender = ({ initialProblem }: { initialProblem: Problem }) => {
           >
             Save
           </button>
+
+          <button
+            type="button"
+            className="button is-danger"
+            disabled={frozen}
+            style={{ margin: '0 0.75rem' }}
+            onClick={() => {
+              history.goBack();
+            }}
+          >
+            Delete
+          </button>
         </FieldRow>
 
         <hr />
@@ -321,9 +333,7 @@ const ProblemEditPage = () => {
 
   React.useEffect(() => {
     console.log('Refetched.');
-    API.withJWTContext(jwtContext)
-      .getProblem(problemSlug as string)
-      .then(setProblem);
+    new API(jwtContext).getProblem(problemSlug as string).then(setProblem);
   }, [problemSlug]);
 
   return (

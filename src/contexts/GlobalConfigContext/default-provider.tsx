@@ -1,10 +1,7 @@
 import * as React from 'react';
+import GlobalConfigContext from '.';
 
-const GlobalConfigContext = React.createContext({
-  judgeServer: '',
-});
-
-export const GlobalConfigContextController = ({ children, ...props }: any) => (
+export const GlobalConfigContextDefaultProvider = ({ children, ...props }: any) => (
   <GlobalConfigContext.Provider
     value={{
       judgeServer: process.env.JUDGE_SERVER as string,
@@ -15,4 +12,4 @@ export const GlobalConfigContextController = ({ children, ...props }: any) => (
   </GlobalConfigContext.Provider>
 );
 
-export default GlobalConfigContext;
+export default GlobalConfigContextDefaultProvider;

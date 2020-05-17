@@ -6,10 +6,7 @@ const LogoutPage = () => {
   const jwtContext = React.useContext(JWTContext);
   const history = useHistory();
 
-  jwtContext.set({
-    accessToken: undefined,
-    refreshToken: undefined,
-  });
+  jwtContext.setBaseState({});
 
   history.push('/');
 

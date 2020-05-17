@@ -29,9 +29,10 @@ const LoginPage = () => {
     setFrozen(true);
 
     try {
-      const response = await API.noContext().login(state.username, state.password);
+      const response = await new API().login(state.username, state.password);
       setState(EMPTY_STATE);
-      jwtContext.set({
+      console.log(jwtContext);
+      jwtContext.setBaseState({
         accessToken: response.access_token,
         refreshToken: response.refresh_token,
       });

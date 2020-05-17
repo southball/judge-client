@@ -1,46 +1,20 @@
 import AsyncRenderer from '@/components/AsyncRenderer';
 import JWTContext from '@/contexts/JWTContext';
+import { LastUpdateContextDefaultProvider } from '@/contexts/LastUpdateContext';
 import API, { Problem } from '@/models/API';
 import * as React from 'react';
-import { useState } from 'react';
 import { useHistory } from 'react-router';
+import CreateProblemForm from './create-problem';
 
-interface ProblemsListProps {
-  problems: any[];
-  createProblem: (slug: string) => Promise<void>;
-}
-
-const ProblemsList = ({ problems, createProblem }: ProblemsListProps) => {
+const ProblemsList = ({ problems }: { problems: Problem[] }) => {
   const history = useHistory();
-  const [newProblemSlug, setNewProblemSlug] = useState('');
 
   return (
     <table className="table is-fullwidth is-hoverable">
       <thead>
         <tr>
           <td colSpan={3}>
-            <div className="field has-addons">
-              <div className="control is-expanded">
-                <input
-                  type="text"
-                  className="input"
-                  placeholder="Slug"
-                  value={newProblemSlug}
-                  onChange={(event) => setNewProblemSlug(event.target.value)}
-                />
-              </div>
-              <div className="control">
-                <a
-                  className="button is-info"
-                  onClick={async () => {
-                    await createProblem(newProblemSlug);
-                    setNewProblemSlug('');
-                  }}
-                >
-                  Create Problem
-                </a>
-              </div>
-            </div>
+            <CreateProblemForm />
           </td>
         </tr>
         <tr>
@@ -64,20 +38,18 @@ const ProblemsList = ({ problems, createProblem }: ProblemsListProps) => {
 
 const ProblemsPage = () => {
   const jwtContext = React.useContext(JWTContext);
-  const [updateTime, setUpdateTime] = React.useState(new Date().toString());
-
-  const createProblem = async (slug: string) => {
-    await API.withJWTContext(jwtContext).createProblem(slug);
-    setUpdateTime(new Date().toString());
-  };
 
   return (
-    <>
-      <h1 className="title is-2">Problems</h1>
-      <AsyncRenderer fetcher={() => API.withJWTContext(jwtContext).getProblems()} dependencies={[updateTime]}>
-        {(problems: Problem[]) => <ProblemsList problems={problems} createProblem={createProblem} />}
-      </AsyncRenderer>
-    </>
+    <LastUpdateContextDefaultProvider>
+      {({ lastUpdate }) => (
+        <>
+          <h1 className="title is-2">Problems</h1>
+          <AsyncRenderer fetcher={() => new API(jwtContext).getProblems()} dependencies={[lastUpdate]}>
+            {(problems: Problem[]) => <ProblemsList problems={problems} />}
+          </AsyncRenderer>
+        </>
+      )}
+    </LastUpdateContextDefaultProvider>
   );
 };
 

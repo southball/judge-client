@@ -1,50 +1,39 @@
-import ErrorNotification from '@/components/ErrorNotification';
 import API from '@/models/API';
 import * as React from 'react';
-import { FormEvent } from 'react';
+import { useForm } from 'react-hook-form';
 import { useHistory } from 'react-router';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
+type FormInputs = {
+  username: string;
+  password: string;
+  email?: string;
+  displayName: string;
+};
 
 const RegisterPage = () => {
-  const [username, setUsername] = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [email, setEmail] = React.useState('');
-  const [displayName, setDisplayName] = React.useState('');
-
-  const [isFrozen, setFrozen] = React.useState(false);
-  const [errorMessage, setErrorMessage] = React.useState('');
+  const { register, handleSubmit, errors } = useForm<FormInputs>();
   const history = useHistory();
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (!username || !password || !displayName) {
-      setErrorMessage('Username, password and display name must not be empty.');
-      return;
-    }
-
-    setFrozen(true);
-
+  async function onSubmit({ username, password, email, displayName }: FormInputs) {
     try {
-      await API.noContext().register({
+      await new API().register({
         username,
         password,
         displayName,
         ...(email ? { email } : {}),
       });
 
-      // reset every field
-      setUsername('');
-      setPassword('');
-      setEmail('');
-      setDisplayName('');
-
       history.push('/login');
     } catch (err) {
       console.error(err);
-      setErrorMessage('Wrong username or password.');
-    } finally {
-      setFrozen(false);
+      toast.error(
+        <div>
+          <i className="fas fa-exclamation-circle" /> Unexpected error when registering account. See console for more
+          information.
+        </div>,
+      );
     }
   }
 
@@ -53,47 +42,41 @@ const RegisterPage = () => {
       <h1 className="title is-2">Register</h1>
       <hr />
 
-      <ErrorNotification show={errorMessage.length > 0}>{errorMessage}</ErrorNotification>
-
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div className="field">
           <label className="label">Username</label>
           <div className="control">
             <input
-              disabled={isFrozen}
-              className="input"
+              className={'input' + (errors.username ? ' is-danger' : '')}
               type="text"
-              value={username}
-              required
-              onChange={(event) => setUsername(event.target.value)}
+              name="username"
+              ref={register({ minLength: 6, required: true })}
             />
           </div>
+          {errors.username && (
+            <p className="help is-danger">Username is required and must be at least 6 characters long.</p>
+          )}
         </div>
 
         <div className="field">
           <label className="label">Password</label>
           <div className="control">
             <input
-              disabled={isFrozen}
-              className="input"
+              className={'input' + (errors.password ? ' is-danger' : '')}
               type="password"
-              required
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              name="password"
+              ref={register({ minLength: 8, required: true })}
             />
           </div>
+          {errors.password && (
+            <p className="help is-danger">Password is required and must be at least 8 characters long.</p>
+          )}
         </div>
 
         <div className="field">
           <label className="label">Email (Optional)</label>
           <div className="control">
-            <input
-              disabled={isFrozen}
-              className="input"
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-            />
+            <input className="input" type="email" name="email" ref={register} />
           </div>
         </div>
 
@@ -101,14 +84,13 @@ const RegisterPage = () => {
           <label className="label">Display Name</label>
           <div className="control">
             <input
-              disabled={isFrozen}
-              className="input"
+              className={'input' + (errors.displayName ? ' is-danger' : '')}
               type="text"
-              required
-              value={displayName}
-              onChange={(event) => setDisplayName(event.target.value)}
+              name="displayName"
+              ref={register({ required: true })}
             />
           </div>
+          {errors.displayName && <p className="help is-danger">Display name is required.</p>}
         </div>
 
         <button type="submit" className="button is-primary">

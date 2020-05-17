@@ -25,7 +25,7 @@ const UserEditRender = ({ user: defaultUser }: any) => {
     setFrozen(true);
 
     try {
-      await API.withJWTContext(jwtContext).updateUser(defaultUser.username, {
+      await new API(jwtContext).updateUser(defaultUser.username, {
         display_name: user.display_name,
         ...(user.email ? { email: user.email } : {}),
         ...(jwtContext.hasPermission('admin') ? { permissions: user.permissions } : {}),
@@ -141,7 +141,7 @@ const UserEditPage = () => {
   return (
     <>
       <h1 className="title is-2">Edit user {username}</h1>
-      <AsyncRenderer fetcher={() => API.withJWTContext(jwtContext).getUser(username)} dependencies={[username]}>
+      <AsyncRenderer fetcher={() => new API(jwtContext).getUser(username)} dependencies={[username]}>
         {(user: User) => <UserEditRender user={user} />}
       </AsyncRenderer>
     </>

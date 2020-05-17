@@ -19,7 +19,7 @@ const SubmissionList = () => {
       : `${submission.problem_title}`;
 
   return (
-    <AsyncRenderer fetcher={() => API.withJWTContext(jwtContext).getSubmissions(100)} dependencies={[]}>
+    <AsyncRenderer fetcher={() => new API(jwtContext).getSubmissions(100)} dependencies={[]}>
       {(submissions: Submission[]) => (
         <table className="table is-fullwidth is-striped is-hoverable">
           <thead>

@@ -46,7 +46,7 @@ const ContestEditRender = ({
     setFrozen(true);
     console.log('Save contest:', contest);
     try {
-      const newContest = await API.withJWTContext(jwtContext).updateContest(initialContest.slug, contest);
+      const newContest = await new API(jwtContext).updateContest(initialContest.slug, contest);
       if (newContest.slug !== initialContest.slug) {
         history.push(`/contest/${newContest.slug}/edit`);
       }
@@ -284,10 +284,8 @@ const ContestEditPage = () => {
   const [problems, setProblems] = React.useState<Problem[]>();
 
   React.useEffect(() => {
-    API.withJWTContext(jwtContext)
-      .getContest(contestSlug as string)
-      .then(setContest);
-    API.withJWTContext(jwtContext).getProblems().then(setProblems);
+    new API(jwtContext).getContest(contestSlug as string).then(setContest);
+    new API(jwtContext).getProblems().then(setProblems);
   }, [contestSlug]);
 
   return (

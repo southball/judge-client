@@ -158,7 +158,7 @@ const SubmissionPage = () => {
     const fetchId = accumulatedFetchId + 1;
     setAccumulatedFetchId(fetchId);
 
-    API.withJWTContext(jwtContext)
+    new API(jwtContext)
       .getSubmission(parseInt(submissionID as string))
       .then((newSubmission: Submission) => {
         console.log('Fetched:', newSubmission);
@@ -230,7 +230,7 @@ const SubmissionPage = () => {
 
   const rejudge = async () => {
     setSubmission(undefined);
-    await API.withJWTContext(jwtContext)
+    await new API(jwtContext)
       .rejudgeSubmission(parseInt(submissionID as string))
       .then(setSubmission)
       .catch(() => setNotFound(true));

@@ -1,5 +1,5 @@
 import { JWTContextProps } from '@/contexts/JWTContext';
-import axios from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 
 // TODO complete types for models
 export type Problem = any;
@@ -9,21 +9,34 @@ export type Submission = any;
 export type User = any;
 
 export default class API {
-  private jwtContext: JWTContextProps;
+  private jwtContext?: JWTContextProps;
+
+  public constructor(jwtContext?: JWTContextProps) {
+    this.jwtContext = jwtContext;
+  }
 
   public static withJWTContext(jwtContext: JWTContextProps): API {
-    const api = new API();
-    api.jwtContext = jwtContext;
-    return api;
+    return new API(jwtContext);
   }
 
   public static noContext(): API {
-    const api = new API();
-    return api;
+    return new API();
   }
 
   private static resolveURL(url: string): string {
     return new URL(url, process.env.JUDGE_SERVER).href;
+  }
+
+  /**
+   * A wrapper around this.jwtContext.withAuthorization to make sure it
+   * functions when this.jwtContext is undefined.
+   */
+  public async withAuthorization(header: AxiosRequestConfig): Promise<AxiosRequestConfig> {
+    if (!this.jwtContext) {
+      return header;
+    } else {
+      return await this.jwtContext.withAuthorization(header);
+    }
   }
 
   public async login(username: string, password: string): Promise<any> {
@@ -44,22 +57,19 @@ export default class API {
   }
 
   public async getContests(): Promise<Contest[]> {
-    const response = await axios.get(API.resolveURL(`/contests`), await this.jwtContext.withAuthorization({}));
+    const response = await axios.get(API.resolveURL(`/contests`), await this.withAuthorization({}));
     if (!response.data.success) throw response.data;
     return response.data.data;
   }
 
   public async getContest(contestSlug: string): Promise<Contest> {
-    const response = await axios.get(
-      API.resolveURL(`/contest/${contestSlug}`),
-      await this.jwtContext.withAuthorization({}),
-    );
+    const response = await axios.get(API.resolveURL(`/contest/${contestSlug}`), await this.withAuthorization({}));
     if (!response.data.success) throw response.data;
     return response.data.data;
   }
 
   public async getProblems(): Promise<Problem[]> {
-    const response = await axios.get(API.resolveURL(`/problems`), await this.jwtContext.withAuthorization({}));
+    const response = await axios.get(API.resolveURL(`/problems`), await this.withAuthorization({}));
     if (!response.data.success) throw response.data;
     return response.data.data;
   }
@@ -68,7 +78,7 @@ export default class API {
     const response = await axios.post(
       API.resolveURL(`/contests`),
       { slug: contestSlug },
-      await this.jwtContext.withAuthorization({}),
+      await this.withAuthorization({}),
     );
     if (!response.data.success) throw response.data;
     return response.data.data;
@@ -78,17 +88,14 @@ export default class API {
     const response = await axios.put(
       API.resolveURL(`/contest/${contestSlug}`),
       { ...newContest },
-      await this.jwtContext.withAuthorization({}),
+      await this.withAuthorization({}),
     );
     if (!response.data.success) throw response.data;
     return response.data.data;
   }
 
   public async getProblem(problemSlug: string): Promise<Problem> {
-    const response = await axios.get(
-      API.resolveURL(`/problem/${problemSlug}`),
-      await this.jwtContext.withAuthorization({}),
-    );
+    const response = await axios.get(API.resolveURL(`/problem/${problemSlug}`), await this.withAuthorization({}));
     if (!response.data.success) throw response.data;
     return response.data.data;
   }
@@ -97,7 +104,7 @@ export default class API {
     const response = await axios.post(
       API.resolveURL(`/problems`),
       { slug: problemSlug },
-      await this.jwtContext.withAuthorization({}),
+      await this.withAuthorization({}),
     );
     if (!response.data.success) throw response.data;
     return response.data.data;
@@ -107,7 +114,7 @@ export default class API {
     const response = await axios.put(
       API.resolveURL(`/problem/${problemSlug}`),
       { ...newProblem },
-      await this.jwtContext.withAuthorization({}),
+      await this.withAuthorization({}),
     );
     if (!response.data.success) throw response.data;
     return response.data.data;
@@ -116,7 +123,7 @@ export default class API {
   public async getContestProblem(contestSlug: string, contestProblemSlug: string): Promise<Problem> {
     const response = await axios.get(
       API.resolveURL(`/contest/${contestSlug}/problem/${contestProblemSlug}`),
-      await this.jwtContext.withAuthorization({}),
+      await this.withAuthorization({}),
     );
     if (!response.data.success) throw response.data;
     return response.data.data;
@@ -131,7 +138,7 @@ export default class API {
     const response = await axios.post(
       API.resolveURL(`/contest/${contestSlug}/problem/${contestProblemSlug}/submit`),
       { language: language, source_code: sourceCode },
-      await this.jwtContext.withAuthorization({}),
+      await this.withAuthorization({}),
     );
     if (!response.data.success) throw response.data;
     return response.data.data;
@@ -141,7 +148,7 @@ export default class API {
     const response = await axios.post(
       API.resolveURL(`/problem/${problemSlug}/submit`),
       { language: language, source_code: sourceCode },
-      await this.jwtContext.withAuthorization({}),
+      await this.withAuthorization({}),
     );
     if (!response.data.success) throw response.data;
     return response.data.data;
@@ -154,17 +161,13 @@ export default class API {
   }
 
   public async getUser(username: string): Promise<User> {
-    const response = await axios.get(API.resolveURL(`/user/${username}`), await this.jwtContext.withAuthorization({}));
+    const response = await axios.get(API.resolveURL(`/user/${username}`), await this.withAuthorization({}));
     if (!response.data.success) throw response.data;
     return response.data.data;
   }
 
   public async updateUser(username: string, newUser: User): Promise<User> {
-    const response = await axios.put(
-      API.resolveURL(`/user/${username}`),
-      newUser,
-      await this.jwtContext.withAuthorization({}),
-    );
+    const response = await axios.put(API.resolveURL(`/user/${username}`), newUser, await this.withAuthorization({}));
     if (!response.data.success) throw response.data;
     return response.data.data;
   }
@@ -172,7 +175,7 @@ export default class API {
   public async getSubmissions(count: number, begin?: number): Promise<Submission[]> {
     const response = await axios.get(
       API.resolveURL(`/submissions`),
-      await this.jwtContext.withAuthorization({
+      await this.withAuthorization({
         params: { count, begin },
       }),
     );
@@ -181,10 +184,7 @@ export default class API {
   }
 
   public async getSubmission(submissionID: number): Promise<Submission> {
-    const response = await axios.get(
-      API.resolveURL(`/submission/${submissionID}`),
-      await this.jwtContext.withAuthorization({}),
-    );
+    const response = await axios.get(API.resolveURL(`/submission/${submissionID}`), await this.withAuthorization({}));
     if (!response.data.success) throw response.data;
     return response.data.data;
   }
@@ -193,7 +193,7 @@ export default class API {
     const response = await axios.post(
       API.resolveURL(`/submission/${submissionID}/rejudge`),
       {},
-      await this.jwtContext.withAuthorization({}),
+      await this.withAuthorization({}),
     );
     if (!response.data.success) throw response.data;
     return response.data.data;
@@ -203,7 +203,7 @@ export default class API {
     const response = await axios.put(
       API.resolveURL(`/problem/${problemSlug}/testcases`),
       testcasesZipFile,
-      await this.jwtContext.withAuthorization({ headers: { 'Content-Type': 'application/zip' } }),
+      await this.withAuthorization({ headers: { 'Content-Type': 'application/zip' } }),
     );
     if (!response.data.success) throw response.data;
     return response.data.data;

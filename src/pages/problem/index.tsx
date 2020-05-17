@@ -106,9 +106,6 @@ const ProblemRender = ({
         >
           Submit
         </button>
-        <button className="button" onClick={() => setFrozen(!frozen)}>
-          Toggle Frozen
-        </button>
       </div>
     </div>
   );
@@ -120,14 +117,16 @@ const ProblemPage = () => {
   const history = useHistory();
 
   type State = { contest?: Contest; problem: Problem };
-  const [loaded, erred, { contest, problem }] = useAsyncState<State>(async (): Promise<State> => {
-    const api = API.withJWTContext(jwtContext);
+  const [loaded, erred, state] = useAsyncState<State>(async (): Promise<State> => {
+    const api = new API(jwtContext);
     if (problemSlug) {
       const problem = await api.getProblem(problemSlug);
       return { problem };
     } else if (contestSlug && contestProblemSlug) {
-      const contest = await api.getContest(contestSlug);
-      const problem = await api.getContest(problemSlug);
+      const [contest, problem] = await Promise.all([
+        api.getContest(contestSlug),
+        api.getContestProblem(contestSlug, contestProblemSlug),
+      ]);
       return { contest, problem };
     } else {
       throw new Error('Unexpected path arguments.');
@@ -138,21 +137,16 @@ const ProblemPage = () => {
     let submission: SubmissionID = { id: -1 };
 
     if (problemSlug) {
-      submission = await API.withJWTContext(jwtContext).submitToProblem(problemSlug, language, sourceCode);
+      submission = await new API(jwtContext).submitToProblem(problemSlug, language, sourceCode);
     } else if (contestSlug && contestProblemSlug) {
-      submission = await API.withJWTContext(jwtContext).submitToContest(
-        contestSlug,
-        contestProblemSlug,
-        language,
-        sourceCode,
-      );
+      submission = await new API(jwtContext).submitToContest(contestSlug, contestProblemSlug, language, sourceCode);
     }
 
     history.push(`/submission/${submission.id}`);
   };
 
   return (
-    <AsyncDisplay loaded={loaded} erred={erred} state={{ contest, problem }}>
+    <AsyncDisplay loaded={loaded} erred={erred} state={state}>
       {({ contest, problem }: State) => <ProblemRender contest={contest} problem={problem} submit={submit} />}
     </AsyncDisplay>
   );

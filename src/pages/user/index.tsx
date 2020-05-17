@@ -70,7 +70,7 @@ const UserPage = () => {
   return (
     <>
       <h1 className="title is-2">User {username}</h1>
-      <AsyncRenderer fetcher={() => API.withJWTContext(jwtContext).getUser(username)} dependencies={[username]}>
+      <AsyncRenderer fetcher={() => new API(jwtContext).getUser(username)} dependencies={[username]}>
         {(user: User) => <UserRender user={user} />}
       </AsyncRenderer>
     </>

@@ -16,9 +16,11 @@ const ContestDisplay = ({ contest }: { contest: Contest }) => {
       <h1 className="title is-2">{contest.title}</h1>
 
       <div className="control-group">
-        <NavLink to={`/contest/${contest.slug}/edit`}>
-          <button className="button is-primary">Edit Contest</button>
-        </NavLink>
+        {jwtContext.hasPermission('admin') && (
+          <NavLink to={`/contest/${contest.slug}/edit`}>
+            <button className="button is-primary">Edit Contest</button>
+          </NavLink>
+        )}
       </div>
 
       <h2 className="title is-3">Information</h2>
@@ -39,11 +41,11 @@ const ContestDisplay = ({ contest }: { contest: Contest }) => {
             </tr>
           )}
           <tr>
-            <th>Contest Start Time</th>
+            <th>Contest Start Time (Local Time)</th>
             <td>{moment(contest.start_time).format('YYYY-MM-DD HH:mm:ss')}</td>
           </tr>
           <tr>
-            <th>Contest End Time</th>
+            <th>Contest End Time (Local Time)</th>
             <td>{moment(contest.end_time).format('YYYY-MM-DD HH:mm:ss')}</td>
           </tr>
         </tbody>
@@ -85,10 +87,7 @@ const ContestPage = () => {
   const jwtContext = React.useContext(JWTContext);
 
   return (
-    <AsyncRenderer
-      fetcher={() => API.withJWTContext(jwtContext).getContest(contestSlug as string)}
-      dependencies={[contestSlug]}
-    >
+    <AsyncRenderer fetcher={() => new API(jwtContext).getContest(contestSlug as string)} dependencies={[contestSlug]}>
       {(contest: Contest) => <ContestDisplay contest={contest} />}
     </AsyncRenderer>
   );

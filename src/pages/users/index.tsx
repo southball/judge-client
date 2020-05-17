@@ -28,7 +28,7 @@ const UsersPage = () => {
   return (
     <>
       <h1 className="title is-2">Users</h1>
-      <AsyncRenderer fetcher={() => API.noContext().getUsers()} dependencies={[]}>
+      <AsyncRenderer fetcher={() => new API().getUsers()} dependencies={[]}>
         {(users: User[]) => <UsersDisplay users={users} />}
       </AsyncRenderer>
     </>

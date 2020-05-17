@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 export type IsLoadedType = boolean;
 export type IsErredType = boolean;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const useAsyncState = <T extends any>(
   fetcher: () => Promise<T>,
   dependencies: any[],
