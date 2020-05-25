@@ -2,7 +2,14 @@ import axios, * as Axios from 'axios';
 import * as jsonwebtoken from 'jsonwebtoken';
 import * as React from 'react';
 import { useContext, useEffect, useMemo, useState } from 'react';
-import JWTContext, { JWTContextBaseState, JWTContextConstants, JWTContextDerivedState, JWTContextGetter, JWTContextProps, JWTContextRefresher } from '.';
+import JWTContext, {
+  JWTContextBaseState,
+  JWTContextConstants,
+  JWTContextDerivedState,
+  JWTContextGetter,
+  JWTContextProps,
+  JWTContextRefresher,
+} from '.';
 import GlobalConfigContext, { GlobalConfigContextProps } from '../GlobalConfigContext';
 
 const LOCAL_STORAGE_KEY = 'JUDGE_AUTH';

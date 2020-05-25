@@ -6,7 +6,9 @@
   "scripts": {
     "build": "webpack-cli --production --config config/webpack.production.js",
     "dev": "webpack-dev-server --config config/webpack.development.js",
-    "lint": "eslint 'src/**/*.{ts,tsx,js}' --fix"
+    "lint": "eslint 'src/**/*.{ts,tsx,js}'",
+    "lint:fix": "yarn lint --fix",
+    "format": "prettier --write --ignore .gitignore '**/*.{ts,tsx,js,json}' && yarn lint:fix"
   },
   "keywords": [],
   "author": "",
